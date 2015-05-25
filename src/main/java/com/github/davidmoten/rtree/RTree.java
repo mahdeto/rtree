@@ -1,6 +1,5 @@
 package com.github.davidmoten.rtree;
 
-import static com.github.davidmoten.rtree.geometry.Geometries.rectangle;
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 
@@ -10,9 +9,9 @@ import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func2;
 
+import com.github.davidmoten.rtree.geometry.Cuboid;
 import com.github.davidmoten.rtree.geometry.Geometry;
 import com.github.davidmoten.rtree.geometry.Point;
-import com.github.davidmoten.rtree.geometry.Rectangle;
 import com.github.davidmoten.rx.operators.OperatorBoundedPriorityQueue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -528,7 +527,7 @@ public final class RTree<T, S extends Geometry> {
      *            the rectangle to check intersection with
      * @return whether the geometry and the rectangle intersect
      */
-    public static Func1<Geometry, Boolean> intersects(final Rectangle r) {
+    public static Func1<Geometry, Boolean> intersects(final Cuboid r) {
         return new Func1<Geometry, Boolean>() {
             @Override
             public Boolean call(Geometry g) {
@@ -557,7 +556,7 @@ public final class RTree<T, S extends Geometry> {
      *            rectangle to check intersection with the entry mbr
      * @return entries that intersect with the rectangle r
      */
-    public Observable<Entry<T, S>> search(final Rectangle r) {
+    public Observable<Entry<T, S>> search(final Cuboid r) {
         return search(intersects(r));
     }
 
@@ -570,7 +569,7 @@ public final class RTree<T, S extends Geometry> {
      * @return entries that intersect with the point p
      */
     public Observable<Entry<T, S>> search(final Point p) {
-        return search(p.mbr());
+        return search(p.mbc());
     }
 
     /**
@@ -584,7 +583,7 @@ public final class RTree<T, S extends Geometry> {
      *            entries returned must be within this distance from rectangle r
      * @return the sequence of matching entries
      */
-    public Observable<Entry<T, S>> search(final Rectangle r, final double maxDistance) {
+    public Observable<Entry<T, S>> search(final Cuboid r, final double maxDistance) {
         return search(new Func1<Geometry, Boolean>() {
             @Override
             public Boolean call(Geometry g) {
@@ -608,7 +607,7 @@ public final class RTree<T, S extends Geometry> {
      */
     public <R extends Geometry> Observable<Entry<T, S>> search(final R g,
             final Func2<? super S, ? super R, Boolean> intersects) {
-        return search(g.mbr()).filter(new Func1<Entry<T, S>, Boolean>() {
+        return search(g.mbc()).filter(new Func1<Entry<T, S>, Boolean>() {
             @Override
             public Boolean call(Entry<T, S> entry) {
                 return intersects.call(entry.geometry(), g);
@@ -638,7 +637,7 @@ public final class RTree<T, S extends Geometry> {
             @Override
             public Boolean call(Geometry entry) {
                 // just use the mbr initially
-                return entry.distance(g.mbr()) < maxDistance;
+                return entry.distance(g.mbc()) < maxDistance;
             }
         })
         // refine with distance function
@@ -662,7 +661,7 @@ public final class RTree<T, S extends Geometry> {
      * @return the sequence of matching entries
      */
     public Observable<Entry<T, S>> search(final Point p, final double maxDistance) {
-        return search(p.mbr(), maxDistance);
+        return search(p.mbc(), maxDistance);
     }
 
     /**
@@ -678,7 +677,7 @@ public final class RTree<T, S extends Geometry> {
      *            max number of entries to return
      * @return nearest entries to maxCount, in ascending order of distance
      */
-    public Observable<Entry<T, S>> nearest(final Rectangle r, final double maxDistance, int maxCount) {
+    public Observable<Entry<T, S>> nearest(final Cuboid r, final double maxDistance, int maxCount) {
         return search(r, maxDistance).lift(
                 new OperatorBoundedPriorityQueue<Entry<T, S>>(maxCount, Comparators
                         .<T, S> ascendingDistance(r)));
@@ -697,7 +696,7 @@ public final class RTree<T, S extends Geometry> {
      * @return nearest entries to maxCount, in ascending order of distance
      */
     public Observable<Entry<T, S>> nearest(final Point p, final double maxDistance, int maxCount) {
-        return nearest(p.mbr(), maxDistance, maxCount);
+        return nearest(p.mbc(), maxDistance, maxCount);
     }
 
     /**
@@ -722,10 +721,10 @@ public final class RTree<T, S extends Geometry> {
      *            using the coordinate system of the entries
      * @return visualizer
      */
-    @SuppressWarnings("unchecked")
-    public Visualizer visualize(int width, int height, Rectangle view) {
-        return new Visualizer((RTree<?, Geometry>) this, width, height, view);
-    }
+//    @SuppressWarnings("unchecked")
+//    public Visualizer visualize(int width, int height, Cuboid view) {
+//        return new Visualizer((RTree<?, Geometry>) this, width, height, view);
+//    }
 
     /**
      * Returns a {@link Visualizer} for an image of given width and height and
@@ -739,25 +738,25 @@ public final class RTree<T, S extends Geometry> {
      *            of the image in pixels
      * @return visualizer
      */
-    public Visualizer visualize(int width, int height) {
-        return visualize(width, height, calculateMaxView(this));
-    }
+//    public Visualizer visualize(int width, int height) {
+//        return visualize(width, height, calculateMaxView(this));
+//    }
 
-    private Rectangle calculateMaxView(RTree<T, S> tree) {
-        return tree
-                .entries()
-                .reduce(Optional.<Rectangle> absent(),
-                        new Func2<Optional<Rectangle>, Entry<T, S>, Optional<Rectangle>>() {
-
-                            @Override
-                            public Optional<Rectangle> call(Optional<Rectangle> r, Entry<T, S> entry) {
-                                if (r.isPresent())
-                                    return of(r.get().add(entry.geometry().mbr()));
-                                else
-                                    return of(entry.geometry().mbr());
-                            }
-                        }).toBlocking().single().or(rectangle(0, 0, 0, 0));
-    }
+//    private Cuboid calculateMaxView(RTree<T, S> tree) {
+//        return tree
+//                .entries()
+//                .reduce(Optional.<Cuboid> absent(),
+//                        new Func2<Optional<Cuboid>, Entry<T, S>, Optional<Cuboid>>() {
+//
+//                            @Override
+//                            public Optional<Cuboid> call(Optional<Cuboid> r, Entry<T, S> entry) {
+//                                if (r.isPresent())
+//                                    return of(r.get().add(entry.geometry().mbc()));
+//                                else
+//                                    return of(entry.geometry().mbc());
+//                            }
+//                        }).toBlocking().single().or(Geometries.cuboid(0, 0, 0, 0, 0, 0));
+//    }
 
     Optional<? extends Node<T, S>> root() {
         return root;

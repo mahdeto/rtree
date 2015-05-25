@@ -21,7 +21,7 @@ public final class SplitterRStar implements Splitter {
     @SuppressWarnings("unchecked")
     public SplitterRStar() {
         this.comparator = Comparators.compose(Comparators.overlapListPairComparator,
-                Comparators.areaPairComparator);
+                Comparators.volumePairComparator);
     }
 
     @Override
@@ -35,6 +35,8 @@ public final class SplitterRStar implements Splitter {
         map.put(SortType.X_UPPER, getPairs(minSize, sort(items, INCREASING_X_UPPER)));
         map.put(SortType.Y_LOWER, getPairs(minSize, sort(items, INCREASING_Y_LOWER)));
         map.put(SortType.Y_UPPER, getPairs(minSize, sort(items, INCREASING_Y_UPPER)));
+        map.put(SortType.Z_LOWER, getPairs(minSize, sort(items, INCREASING_Z_LOWER)));
+        map.put(SortType.Z_UPPER, getPairs(minSize, sort(items, INCREASING_Z_UPPER)));
 
         // compute S the sum of all margin-values of the lists above
         // the list with the least S is then used to find minimum overlap
@@ -46,7 +48,7 @@ public final class SplitterRStar implements Splitter {
     }
 
     private static enum SortType {
-        X_LOWER, X_UPPER, Y_LOWER, Y_UPPER;
+        X_LOWER, X_UPPER, Y_LOWER, Y_UPPER, Z_LOWER, Z_UPPER;
     }
 
     private static final List<SortType> sortTypes = Collections.unmodifiableList(Arrays
@@ -91,7 +93,7 @@ public final class SplitterRStar implements Splitter {
 
         @Override
         public int compare(HasGeometry n1, HasGeometry n2) {
-            return ((Float) n1.geometry().mbr().x1()).compareTo(n2.geometry().mbr().x1());
+            return ((Float) n1.geometry().mbc().x1()).compareTo(n2.geometry().mbc().x1());
         }
     };
 
@@ -99,7 +101,7 @@ public final class SplitterRStar implements Splitter {
 
         @Override
         public int compare(HasGeometry n1, HasGeometry n2) {
-            return ((Float) n1.geometry().mbr().x2()).compareTo(n2.geometry().mbr().x2());
+            return ((Float) n1.geometry().mbc().x2()).compareTo(n2.geometry().mbc().x2());
         }
     };
 
@@ -107,7 +109,7 @@ public final class SplitterRStar implements Splitter {
 
         @Override
         public int compare(HasGeometry n1, HasGeometry n2) {
-            return ((Float) n1.geometry().mbr().y1()).compareTo(n2.geometry().mbr().y1());
+            return ((Float) n1.geometry().mbc().y1()).compareTo(n2.geometry().mbc().y1());
         }
     };
 
@@ -115,8 +117,25 @@ public final class SplitterRStar implements Splitter {
 
         @Override
         public int compare(HasGeometry n1, HasGeometry n2) {
-            return ((Float) n1.geometry().mbr().y2()).compareTo(n2.geometry().mbr().y2());
+            return ((Float) n1.geometry().mbc().y2()).compareTo(n2.geometry().mbc().y2());
         }
     };
+    
+    private static Comparator<HasGeometry> INCREASING_Z_LOWER = new Comparator<HasGeometry>() {
+
+        @Override
+        public int compare(HasGeometry n1, HasGeometry n2) {
+            return ((Float) n1.geometry().mbc().z1()).compareTo(n2.geometry().mbc().z1());
+        }
+    };
+
+    private static Comparator<HasGeometry> INCREASING_Z_UPPER = new Comparator<HasGeometry>() {
+
+        @Override
+        public int compare(HasGeometry n1, HasGeometry n2) {
+            return ((Float) n1.geometry().mbc().z2()).compareTo(n2.geometry().mbc().z2());
+        }
+    };
+
 
 }

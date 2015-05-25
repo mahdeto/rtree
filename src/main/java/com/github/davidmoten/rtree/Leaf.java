@@ -9,26 +9,26 @@ import java.util.List;
 import rx.Subscriber;
 import rx.functions.Func1;
 
+import com.github.davidmoten.rtree.geometry.Cuboid;
 import com.github.davidmoten.rtree.geometry.Geometry;
 import com.github.davidmoten.rtree.geometry.ListPair;
-import com.github.davidmoten.rtree.geometry.Rectangle;
 import com.google.common.base.Optional;
 
 final class Leaf<T, S extends Geometry> implements Node<T, S> {
 
     private final List<Entry<T, S>> entries;
-    private final Rectangle mbr;
+    private final Cuboid mbc;
     private final Context context;
 
     Leaf(List<Entry<T, S>> entries, Context context) {
         this.entries = entries;
         this.context = context;
-        this.mbr = Util.mbr(entries);
+        this.mbc = Util.mbc(entries);
     }
 
     @Override
     public Geometry geometry() {
-        return mbr;
+        return mbc;
     }
 
     List<Entry<T, S>> entries() {
@@ -39,7 +39,7 @@ final class Leaf<T, S extends Geometry> implements Node<T, S> {
     public void search(Func1<? super Geometry, Boolean> condition,
             Subscriber<? super Entry<T, S>> subscriber) {
 
-        if (!condition.call(this.geometry().mbr()))
+        if (!condition.call(this.geometry().mbc()))
             return;
 
         for (final Entry<T, S> entry : entries) {

@@ -9,35 +9,35 @@ import java.util.List;
 import rx.Subscriber;
 import rx.functions.Func1;
 
+import com.github.davidmoten.rtree.geometry.Cuboid;
 import com.github.davidmoten.rtree.geometry.Geometry;
 import com.github.davidmoten.rtree.geometry.ListPair;
-import com.github.davidmoten.rtree.geometry.Rectangle;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 final class NonLeaf<T, S extends Geometry> implements Node<T, S> {
 
     private final List<? extends Node<T, S>> children;
-    private final Rectangle mbr;
+    private final Cuboid mbc;
     private final Context context;
 
     NonLeaf(List<? extends Node<T, S>> children, Context context) {
         Preconditions.checkArgument(!children.isEmpty());
         this.context = context;
         this.children = children;
-        this.mbr = Util.mbr(children);
+        this.mbc = Util.mbc(children);
     }
 
     @Override
     public Geometry geometry() {
-        return mbr;
+        return mbc;
     }
 
     @Override
     public void search(Func1<? super Geometry, Boolean> criterion,
             Subscriber<? super Entry<T, S>> subscriber) {
 
-        if (!criterion.call(this.geometry().mbr()))
+        if (!criterion.call(this.geometry().mbc()))
             return;
 
         for (final Node<T, S> child : children) {
@@ -59,7 +59,7 @@ final class NonLeaf<T, S extends Geometry> implements Node<T, S> {
 
     @Override
     public List<Node<T, S>> add(Entry<? extends T, ? extends S> entry) {
-        final Node<T, S> child = context.selector().select(entry.geometry().mbr(), children);
+        final Node<T, S> child = context.selector().select(entry.geometry().mbc(), children);
         List<Node<T, S>> list = child.add(entry);
         List<? extends Node<T, S>> children2 = Util.replace(children, child, list);
         if (children2.size() <= context.maxChildren())
@@ -94,7 +94,7 @@ final class NonLeaf<T, S extends Geometry> implements Node<T, S> {
         int countDeleted = 0;
 
         for (final Node<T, S> child : children) {
-            if (entry.geometry().intersects(child.geometry().mbr())) {
+            if (entry.geometry().intersects(child.geometry().mbc())) {
                 final NodeAndEntries<T, S> result = child.delete(entry, all);
                 if (result.node().isPresent()) {
                     if (result.node().get() != child) {

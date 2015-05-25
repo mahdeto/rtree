@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.github.davidmoten.rtree.geometry.Cuboid;
 import com.github.davidmoten.rtree.geometry.Geometry;
-import com.github.davidmoten.rtree.geometry.Rectangle;
 import com.google.common.base.Optional;
 
 public final class Visualizer {
@@ -20,10 +20,10 @@ public final class Visualizer {
     private final RTree<?, Geometry> tree;
     private final int width;
     private final int height;
-    private final Rectangle view;
+    private final Cuboid view;
     private final int maxDepth;
 
-    Visualizer(RTree<?, Geometry> tree, int width, int height, Rectangle view) {
+    Visualizer(RTree<?, Geometry> tree, int width, int height, Cuboid view) {
         this.tree = tree;
         this.width = width;
         this.height = height;
@@ -53,32 +53,32 @@ public final class Visualizer {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
 
         if (tree.root().isPresent()) {
-            final List<RectangleDepth> nodeDepths = getNodeDepthsSortedByDepth(tree.root().get());
+            final List<CuboidDepth> nodeDepths = getNodeDepthsSortedByDepth(tree.root().get());
             drawNode(g, nodeDepths);
         }
         return image;
     }
 
-    private <T, S extends Geometry> List<RectangleDepth> getNodeDepthsSortedByDepth(Node<T, S> root) {
-        final List<RectangleDepth> list = getRectangleDepths(root, 0);
-        Collections.sort(list, new Comparator<RectangleDepth>() {
+    private <T, S extends Geometry> List<CuboidDepth> getNodeDepthsSortedByDepth(Node<T, S> root) {
+        final List<CuboidDepth> list = getRectangleDepths(root, 0);
+        Collections.sort(list, new Comparator<CuboidDepth>() {
 
             @Override
-            public int compare(RectangleDepth n1, RectangleDepth n2) {
+            public int compare(CuboidDepth n1, CuboidDepth n2) {
                 return ((Integer) n1.getDepth()).compareTo(n2.getDepth());
             }
         });
         return list;
     }
 
-    private <T, S extends Geometry> List<RectangleDepth> getRectangleDepths(Node<T, S> node,
+    private <T, S extends Geometry> List<CuboidDepth> getRectangleDepths(Node<T, S> node,
             int depth) {
-        final List<RectangleDepth> list = new ArrayList<RectangleDepth>();
-        list.add(new RectangleDepth(node.geometry().mbr(), depth));
+        final List<CuboidDepth> list = new ArrayList<CuboidDepth>();
+        list.add(new CuboidDepth(node.geometry().mbc(), depth));
         if (node instanceof Leaf) {
             final Leaf<T, S> leaf = (Leaf<T, S>) node;
             for (final Entry<T, S> entry : leaf.entries()) {
-                list.add(new RectangleDepth(entry.geometry().mbr(), depth + 2));
+                list.add(new CuboidDepth(entry.geometry().mbc(), depth + 2));
             }
         } else {
             final NonLeaf<T, S> n = (NonLeaf<T, S>) node;
@@ -89,17 +89,18 @@ public final class Visualizer {
         return list;
     }
 
-    private void drawNode(Graphics2D g, List<RectangleDepth> nodes) {
-        for (final RectangleDepth node : nodes) {
+    private void drawNode(Graphics2D g, List<CuboidDepth> nodes) {
+        for (final CuboidDepth node : nodes) {
             final Color color = Color.getHSBColor(node.getDepth() / (maxDepth + 1f), 1f, 1f);
             g.setStroke(new BasicStroke(Math.max(0.5f, maxDepth - node.getDepth() + 1 - 1)));
             g.setColor(color);
-            final Rectangle r = node.getRectangle();
+            final Cuboid r = node.getCuboid();
             drawRectangle(g, r);
         }
     }
 
-    private void drawRectangle(Graphics2D g, Rectangle r) {
+    //TODO implement 3d drawing logic here
+    private void drawRectangle(Graphics2D g, Cuboid r) {
         final double x1 = (r.x1() - view.x1()) / (view.x2() - view.x1()) * width;
         final double y1 = (r.y1() - view.y1()) / (view.y2() - view.y1()) * height;
         final double x2 = (r.x2() - view.x1()) / (view.x2() - view.x1()) * width;
