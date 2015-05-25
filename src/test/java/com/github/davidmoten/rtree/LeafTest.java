@@ -8,7 +8,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import com.github.davidmoten.rtree.geometry.Geometries;
-import com.github.davidmoten.rtree.geometry.Rectangle;
+import com.github.davidmoten.rtree.geometry.Cuboid;
 
 public class LeafTest {
 
@@ -17,16 +17,16 @@ public class LeafTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCannotHaveZeroChildren() {
-        new Leaf<Object, Rectangle>(new ArrayList<Entry<Object, Rectangle>>(), context);
+        new Leaf<Object, Cuboid>(new ArrayList<Entry<Object, Cuboid>>(), context);
     }
 
     @Test
     public void testMbr() {
-        Rectangle r1 = Geometries.rectangle(0, 1, 3, 5);
-        Rectangle r2 = Geometries.rectangle(1, 2, 4, 6);
+        Cuboid r1 = Geometries.cuboid(0, 1, 0, 3, 5, 0);
+        Cuboid r2 = Geometries.cuboid(1, 2, 0, 4, 6, 0);
         @SuppressWarnings("unchecked")
-        Rectangle r = new Leaf<Object, Rectangle>(Arrays.asList(Entry.entry(new Object(), r1),
-                Entry.entry(new Object(), r2)), context).geometry().mbr();
+        Cuboid r = new Leaf<Object, Cuboid>(Arrays.asList(Entry.entry(new Object(), r1),
+                Entry.entry(new Object(), r2)), context).geometry().mbc();
         assertEquals(r1.add(r2), r);
     }
 }

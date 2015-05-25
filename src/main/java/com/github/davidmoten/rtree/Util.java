@@ -8,6 +8,7 @@ import java.util.List;
 import com.github.davidmoten.rtree.geometry.Cuboid;
 import com.github.davidmoten.rtree.geometry.HasGeometry;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 
 /**
  * @author dxm
@@ -42,12 +43,13 @@ public final class Util {
      */
     public static Cuboid mbc(Collection<? extends HasGeometry> items) {
         Preconditions.checkArgument(!items.isEmpty());
-        float minX1 = Float.MAX_VALUE;
-        float minY1 = Float.MAX_VALUE;
-        float minZ1 = Float.MAX_VALUE;
-        float maxX2 = Float.MIN_VALUE;
-        float maxY2 = Float.MIN_VALUE;
-        float maxZ2 = Float.MIN_VALUE;
+        Cuboid some = Iterables.get(items, 0).geometry().mbc();
+        float minX1 = some.x1();
+        float minY1 = some.y1();
+        float minZ1 = some.z1();
+        float maxX2 = some.x2();
+        float maxY2 = some.y2();
+        float maxZ2 = some.z2();
         
         for (final HasGeometry item : items) {
             Cuboid r = item.geometry().mbc();
@@ -61,7 +63,7 @@ public final class Util {
                 maxX2 = r.x2();
             if (r.y2() > maxY2)
                 maxY2 = r.y2();
-            if (r.z2() > maxZ2)
+            if (r.z2() > maxZ2) 
             	maxZ2 = r.z2();
         }
         return Cuboid.create(minX1, minY1, minZ1, maxX2, maxY2, maxZ2);

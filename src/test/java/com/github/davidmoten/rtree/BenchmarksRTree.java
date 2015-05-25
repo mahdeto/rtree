@@ -12,14 +12,14 @@ import rx.Subscriber;
 
 import com.github.davidmoten.rtree.geometry.Geometries;
 import com.github.davidmoten.rtree.geometry.Point;
-import com.github.davidmoten.rtree.geometry.Rectangle;
+import com.github.davidmoten.rtree.geometry.Cuboid;
 
 @State(Scope.Benchmark)
 public class BenchmarksRTree {
 
     private final List<Entry<Object, Point>> entries = GreekEarthquakes.entriesList();
 
-    private final List<Entry<Object, Rectangle>> some = entries1000();
+    private final List<Entry<Object, Cuboid>> some = entries1000();
 
     private final RTree<Object, Point> defaultTreeM4 = RTree.maxChildren(4)
             .<Object, Point> create().add(entries);
@@ -45,29 +45,29 @@ public class BenchmarksRTree {
     private final RTree<Object, Point> starTreeM128 = RTree.maxChildren(128).star()
             .<Object, Point> create().add(entries);
 
-    private final RTree<Object, Rectangle> smallDefaultTreeM4 = RTree.maxChildren(4)
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallDefaultTreeM4 = RTree.maxChildren(4)
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallDefaultTreeM10 = RTree.maxChildren(10)
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallDefaultTreeM10 = RTree.maxChildren(10)
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallStarTreeM4 = RTree.maxChildren(4).star()
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallStarTreeM4 = RTree.maxChildren(4).star()
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallStarTreeM10 = RTree.maxChildren(10).star()
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallStarTreeM10 = RTree.maxChildren(10).star()
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallDefaultTreeM32 = RTree.maxChildren(32)
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallDefaultTreeM32 = RTree.maxChildren(32)
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallStarTreeM32 = RTree.maxChildren(32).star()
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallStarTreeM32 = RTree.maxChildren(32).star()
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallDefaultTreeM128 = RTree.maxChildren(128)
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallDefaultTreeM128 = RTree.maxChildren(128)
+            .<Object, Cuboid> create().add(some);
 
-    private final RTree<Object, Rectangle> smallStarTreeM128 = RTree.maxChildren(128).star()
-            .<Object, Rectangle> create().add(some);
+    private final RTree<Object, Cuboid> smallStarTreeM128 = RTree.maxChildren(128).star()
+            .<Object, Cuboid> create().add(some);
 
     @Benchmark
     public void defaultRTreeInsertOneEntryIntoGreekDataEntriesMaxChildren004() {
@@ -156,7 +156,7 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void defaultRTreeInsertOneEntryInto1000EntriesMaxChildren004() {
-        insertRectangle(smallDefaultTreeM4);
+        insertCuboid(smallDefaultTreeM4);
     }
 
     @Benchmark
@@ -166,7 +166,7 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void defaultRTreeInsertOneEntryInto1000EntriesMaxChildren010() {
-        insertRectangle(smallDefaultTreeM10);
+        insertCuboid(smallDefaultTreeM10);
     }
 
     @Benchmark
@@ -176,12 +176,12 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void rStarTreeInsertOneEntryInto1000EntriesMaxChildren004() {
-        insertRectangle(smallStarTreeM4);
+        insertCuboid(smallStarTreeM4);
     }
 
     @Benchmark
     public void rStarTreeInsertOneEntryInto1000EntriesMaxChildren010() {
-        insertRectangle(smallStarTreeM10);
+        insertCuboid(smallStarTreeM10);
     }
 
     @Benchmark
@@ -196,7 +196,7 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void defaultRTreeInsertOneEntryInto1000EntriesMaxChildren032() {
-        insertRectangle(smallDefaultTreeM32);
+        insertCuboid(smallDefaultTreeM32);
     }
 
     @Benchmark
@@ -206,7 +206,7 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void rStarTreeInsertOneEntryInto1000EntriesMaxChildren032() {
-        insertRectangle(smallStarTreeM32);
+        insertCuboid(smallStarTreeM32);
     }
 
     @Benchmark
@@ -216,7 +216,7 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void defaultRTreeInsertOneEntryInto1000EntriesMaxChildren128() {
-        insertRectangle(smallDefaultTreeM128);
+        insertCuboid(smallDefaultTreeM128);
     }
 
     @Benchmark
@@ -226,7 +226,7 @@ public class BenchmarksRTree {
 
     @Benchmark
     public void rStarTreeInsertOneEntryInto1000EntriesMaxChildren128() {
-        insertRectangle(smallStarTreeM128);
+        insertCuboid(smallStarTreeM128);
     }
 
     @Benchmark
@@ -243,19 +243,19 @@ public class BenchmarksRTree {
         tree.delete(entries.get(1000), true);
     }
 
-    private void search(RTree<Object, Rectangle> tree) {
+    private void search(RTree<Object, Cuboid> tree) {
         // returns 10 results
-        tree.search(Geometries.rectangle(500, 500, 630, 630)).subscribe();
+        tree.search(Geometries.cuboid(500, 500, 500, 630, 630, 630)).subscribe();
     }
 
     private void searchGreek(RTree<Object, Point> tree) {
         // should return 22 results
-        tree.search(Geometries.rectangle(40, 27.0, 40.5, 27.5)).subscribe();
+        tree.search(Geometries.cuboid(40, 27.0,  0, 40.5, 27.5, 0)).subscribe();
     }
 
     private void searchGreekWithBackpressure(RTree<Object, Point> tree) {
         // should return 22 results
-        tree.search(Geometries.rectangle(40, 27.0, 40.5, 27.5)).subscribe(new Subscriber<Object>() {
+        tree.search(Geometries.cuboid(40, 27.0, 0, 40.5, 27.5, 0)).subscribe(new Subscriber<Object>() {
 
             @Override
             public void onStart() {
@@ -279,12 +279,12 @@ public class BenchmarksRTree {
         });
     }
 
-    private void insertRectangle(RTree<Object, Rectangle> tree) {
+    private void insertCuboid(RTree<Object, Cuboid> tree) {
         tree.add(new Object(), RTreeTest.random());
     }
 
     private void insertPoint(RTree<Object, Point> tree) {
-        tree.add(new Object(), Geometries.point(Math.random() * 1000, Math.random() * 1000));
+        tree.add(new Object(), Geometries.point(Math.random() * 1000, Math.random() * 1000, Math.random() * 1000));
     }
 
     public static void main(String[] args) {

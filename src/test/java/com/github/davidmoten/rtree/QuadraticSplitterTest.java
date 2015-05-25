@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.github.davidmoten.rtree.geometry.Cuboid;
 import com.github.davidmoten.rtree.geometry.HasGeometry;
 import com.github.davidmoten.rtree.geometry.ListPair;
-import com.github.davidmoten.rtree.geometry.Rectangle;
 import com.github.davidmoten.util.Pair;
 import com.google.common.collect.Sets;
 
@@ -52,7 +52,7 @@ public class QuadraticSplitterTest {
         final Mbr r2 = r(2);
         final List<Mbr> list = Arrays.asList(r1);
         final List<Mbr> group = Arrays.asList(r2);
-        final Mbr r = SplitterQuadratic.getBestCandidateForGroup(list, group, Util.mbr(group));
+        final Mbr r = SplitterQuadratic.getBestCandidateForGroup(list, group, Util.mbc(group));
         assertEquals(r1, r);
     }
 
@@ -63,7 +63,7 @@ public class QuadraticSplitterTest {
         final Mbr r3 = r(10);
         final List<Mbr> list = Arrays.asList(r1);
         final List<Mbr> group = Arrays.asList(r2, r3);
-        final Mbr r = SplitterQuadratic.getBestCandidateForGroup(list, group, Util.mbr(group));
+        final Mbr r = SplitterQuadratic.getBestCandidateForGroup(list, group, Util.mbc(group));
         assertEquals(r1, r);
     }
 
@@ -74,7 +74,7 @@ public class QuadraticSplitterTest {
         final Mbr r3 = r(10);
         final List<Mbr> list = Arrays.asList(r1, r2);
         final List<Mbr> group = Arrays.asList(r3);
-        final Mbr r = SplitterQuadratic.getBestCandidateForGroup(list, group, Util.mbr(group));
+        final Mbr r = SplitterQuadratic.getBestCandidateForGroup(list, group, Util.mbc(group));
         assertEquals(r2, r);
     }
 
@@ -124,7 +124,7 @@ public class QuadraticSplitterTest {
     }
     
     private static Mbr r(int n) {
-        return new Mbr(Rectangle.create(n, n, n + 1, n + 1));
+        return new Mbr(Cuboid.create(n, n, n, n + 1, n + 1, n + 1));
     }
 
 }
