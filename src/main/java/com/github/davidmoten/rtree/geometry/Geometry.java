@@ -29,14 +29,14 @@ public interface Geometry {
      *            rectangle to measure distance to
      * @return distance to the rectangle r from the geometry
      */
-    double distance(Rectangle r);
+    double distance(Cuboid r);
 
     /**
-     * Returns the minimum bounding rectangle of this geometry.
+     * Returns the minimum bounding cuboid of this geometry.
      * 
-     * @return minimum bounding rectangle
+     * @return minimum bounding cuboid
      */
-    Rectangle mbr();
+    Cuboid mbc();
 
-    boolean intersects(Rectangle r);
+    boolean intersects(Cuboid r);
 }

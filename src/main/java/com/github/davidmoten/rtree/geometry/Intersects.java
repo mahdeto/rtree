@@ -8,16 +8,16 @@ public class Intersects {
         // prevent instantiation
     }
 
-	public static final Func2<Rectangle, Circle, Boolean> rectangleIntersectsCircle = new Func2<Rectangle, Circle, Boolean>() {
+	public static final Func2<Cuboid, Sphere, Boolean> rectangleIntersectsCircle = new Func2<Cuboid, Sphere, Boolean>() {
 		@Override
-		public Boolean call(Rectangle rectangle, Circle circle) {
+		public Boolean call(Cuboid rectangle, Sphere circle) {
 			return circle.intersects(rectangle);
 		}
 	};
 
-	public static final Func2<Point, Circle, Boolean> pointIntersectsCircle = new Func2<Point, Circle, Boolean>() {
+	public static final Func2<Point, Sphere, Boolean> pointIntersectsCircle = new Func2<Point, Sphere, Boolean>() {
 		@Override
-		public Boolean call(Point point, Circle circle) {
+		public Boolean call(Point point, Sphere circle) {
 			return circle.intersects(point);
 		}
 	};

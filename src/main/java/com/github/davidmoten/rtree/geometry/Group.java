@@ -7,11 +7,11 @@ import com.github.davidmoten.rtree.Util;
 public class Group<T extends HasGeometry> implements HasGeometry {
 
     private final List<T> list;
-    private final Rectangle mbr;
+    private final Cuboid mbc;
 
     public Group(List<T> list) {
         this.list = list;
-        this.mbr = Util.mbr(list);
+        this.mbc = Util.mbc(list);
     }
 
     public List<T> list() {
@@ -20,7 +20,7 @@ public class Group<T extends HasGeometry> implements HasGeometry {
 
     @Override
     public Geometry geometry() {
-        return mbr;
+        return mbc;
     }
 
 }
