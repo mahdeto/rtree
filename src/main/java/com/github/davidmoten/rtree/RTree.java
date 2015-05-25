@@ -10,6 +10,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 
 import com.github.davidmoten.rtree.geometry.Cuboid;
+import com.github.davidmoten.rtree.geometry.Geometries;
 import com.github.davidmoten.rtree.geometry.Geometry;
 import com.github.davidmoten.rtree.geometry.Point;
 import com.github.davidmoten.rx.operators.OperatorBoundedPriorityQueue;
@@ -721,10 +722,10 @@ public final class RTree<T, S extends Geometry> {
      *            using the coordinate system of the entries
      * @return visualizer
      */
-//    @SuppressWarnings("unchecked")
-//    public Visualizer visualize(int width, int height, Cuboid view) {
-//        return new Visualizer((RTree<?, Geometry>) this, width, height, view);
-//    }
+    @SuppressWarnings("unchecked")
+    public Visualizer visualize(int width, int height, Cuboid view) {
+        return new Visualizer((RTree<?, Geometry>) this, width, height, view);
+    }
 
     /**
      * Returns a {@link Visualizer} for an image of given width and height and
@@ -738,25 +739,25 @@ public final class RTree<T, S extends Geometry> {
      *            of the image in pixels
      * @return visualizer
      */
-//    public Visualizer visualize(int width, int height) {
-//        return visualize(width, height, calculateMaxView(this));
-//    }
+    public Visualizer visualize(int width, int height) {
+        return visualize(width, height, calculateMaxView(this));
+    }
 
-//    private Cuboid calculateMaxView(RTree<T, S> tree) {
-//        return tree
-//                .entries()
-//                .reduce(Optional.<Cuboid> absent(),
-//                        new Func2<Optional<Cuboid>, Entry<T, S>, Optional<Cuboid>>() {
-//
-//                            @Override
-//                            public Optional<Cuboid> call(Optional<Cuboid> r, Entry<T, S> entry) {
-//                                if (r.isPresent())
-//                                    return of(r.get().add(entry.geometry().mbc()));
-//                                else
-//                                    return of(entry.geometry().mbc());
-//                            }
-//                        }).toBlocking().single().or(Geometries.cuboid(0, 0, 0, 0, 0, 0));
-//    }
+    private Cuboid calculateMaxView(RTree<T, S> tree) {
+        return tree
+                .entries()
+                .reduce(Optional.<Cuboid> absent(),
+                        new Func2<Optional<Cuboid>, Entry<T, S>, Optional<Cuboid>>() {
+
+                            @Override
+                            public Optional<Cuboid> call(Optional<Cuboid> r, Entry<T, S> entry) {
+                                if (r.isPresent())
+                                    return of(r.get().add(entry.geometry().mbc()));
+                                else
+                                    return of(entry.geometry().mbc());
+                            }
+                        }).toBlocking().single().or(Geometries.cuboid(0, 0, 0, 0, 0, 0));
+    }
 
     Optional<? extends Node<T, S>> root() {
         return root;
